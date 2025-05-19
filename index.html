@@ -4,380 +4,534 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор таможенных платежей</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 50;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+        }
+        .search-result-item {
+            cursor: pointer;
+        }
+        .search-result-item:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen py-8">
-    <div class="container mx-auto px-4 max-w-4xl">
-        <h1 class="text-3xl font-bold text-center mb-6">Калькулятор таможенных платежей</h1>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-4xl mx-auto p-5">
+        <h1 class="text-2xl text-center text-gray-800 font-bold mb-6">Калькулятор таможенных платежей</h1>
         
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Информация о товаре</h2>
+        <div class="flex justify-center mb-6">
+            <img src="image.png" alt="Таможенный калькулятор" class="max-w-full h-auto rounded-lg shadow-md">
+        </div>
+
+        <div class="bg-white p-5 rounded-lg shadow-md">
+            <!-- Секция информации о товаре -->
+            <div class="mb-5 p-4 border border-gray-300 rounded">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">Информация о товаре</h2>
+                
+                <!-- Добавлено поле поиска товаров -->
+                <div class="mb-3 relative">
+                    <label for="productSearch" class="block font-medium mb-1 text-gray-700">Поиск товара (по коду или наименованию):</label>
+                    <input type="text" id="productSearch" 
+                           class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Введите код или название товара">
+                    <div id="searchResults" class="search-results bg-white hidden"></div>
+                </div>
+                
+                <label for="productCode" class="block font-medium mb-1 text-gray-700">Код ТН ВЭД:</label>
+                <input type="text" id="productCode" 
+                       class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Код товара">
+                
+                <label for="productDescription" class="block font-medium mb-1 text-gray-700">Описание товара:</label>
+                <input type="text" id="productDescription" 
+                       class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Описание товара">
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1" for="description">
-                        Описание товара
-                    </label>
-                    <input type="text" id="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
+            <!-- Секция таможенной стоимости -->
+            <div class="mb-5 p-4 border border-gray-300 rounded">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">Таможенная стоимость</h2>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1" for="customsCost">
-                        Таможенная стоимость
-                    </label>
-                    <div class="flex">
-                        <input type="number" id="customsCost" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
-                        <select id="currency" class="px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50">
-                            <option value="RUB">₽</option>
-                            <option value="USD">$</option>
-                            <option value="EUR">€</option>
-                            <option value="CNY">¥</option>
-                        </select>
+                <label for="customsValue" class="block font-medium mb-1 text-gray-700">Таможенная стоимость:</label>
+                <input type="number" id="customsValue" min="0" step="0.01" 
+                       class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <label for="currencyRate" class="block font-medium mb-1 text-gray-700">Курс валюты к рублю:</label>
+                <input type="number" id="currencyRate" min="0" step="0.01" value="1" 
+                       class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <label for="quantity" class="block font-medium mb-1 text-gray-700">Количество товара:</label>
+                <input type="number" id="quantity" min="0" step="0.01" value="1" 
+                       class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <div class="flex flex-wrap items-center space-x-4 mb-2">
+                    <div class="flex items-center">
+                        <input type="radio" id="unitPcs" name="unit" value="pcs" checked class="mr-1">
+                        <label for="unitPcs" class="text-gray-700">шт</label>
                     </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1" for="exchangeRate">
-                        Курс валюты к рублю
-                    </label>
-                    <input type="number" id="exchangeRate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="1" min="0" step="0.0001">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1" for="quantity">
-                        Количество товара
-                    </label>
-                    <div class="flex">
-                        <input type="number" id="quantity" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
-                        <select id="unit" class="px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50">
-                            <option value="pcs">шт</option>
-                            <option value="kg">кг</option>
-                            <option value="l">л</option>
-                            <option value="ml">мл</option>
-                        </select>
+                    <div class="flex items-center">
+                        <input type="radio" id="unitKg" name="unit" value="kg" class="mr-1">
+                        <label for="unitKg" class="text-gray-700">кг</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="unitL" name="unit" value="l" class="mr-1">
+                        <label for="unitL" class="text-gray-700">л</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="unitMl" name="unit" value="ml" class="mr-1">
+                        <label for="unitMl" class="text-gray-700">мл</label>
                     </div>
                 </div>
             </div>
             
-            <h2 class="text-xl font-semibold mb-4">Таможенная пошлина</h2>
-            <div class="mb-6">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Тип ставки таможенной пошлины
-                    </label>
-                    <div class="flex flex-wrap gap-2">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="dutyType" value="advalorem" class="form-radio h-4 w-4 text-blue-600" checked>
-                            <span class="ml-2">Адвалорная (%)</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="dutyType" value="specific" class="form-radio h-4 w-4 text-blue-600">
-                            <span class="ml-2">Специфическая (евро)</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="dutyType" value="combined" class="form-radio h-4 w-4 text-blue-600">
-                            <span class="ml-2">Комбинированная (сложение)</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="dutyType" value="combinedMax" class="form-radio h-4 w-4 text-blue-600">
-                            <span class="ml-2">Комбинированная (максимум)</span>
-                        </label>
+            <!-- Секция таможенной пошлины -->
+            <div class="mb-5 p-4 border border-gray-300 rounded">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">Таможенная пошлина</h2>
+                
+                <label class="block font-medium mb-1 text-gray-700">Тип ставки таможенной пошлины:</label>
+                <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="rateTypeAdvalorem" name="rateType" value="advalorem" checked class="mr-1">
+                        <label for="rateTypeAdvalorem" class="text-gray-700">Адвалорная (%)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rateTypeSpecific" name="rateType" value="specific" class="mr-1">
+                        <label for="rateTypeSpecific" class="text-gray-700">Специфическая (евро)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rateTypeCombinedAdd" name="rateType" value="combined_add" class="mr-1">
+                        <label for="rateTypeCombinedAdd" class="text-gray-700">Комбинированная (сложение)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rateTypeCombinedMax" name="rateType" value="combined_max" class="mr-1">
+                        <label for="rateTypeCombinedMax" class="text-gray-700">Комбинированная (максимум)</label>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="dutyRatePercent">
-                            Ставка пошлины (%)
-                        </label>
-                        <input type="number" id="dutyRatePercent" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.1">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="dutyRateEuro">
-                            Ставка пошлины (евро)
-                        </label>
-                        <input type="number" id="dutyRateEuro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
-                    </div>
+                <div id="advalorem-rate-container">
+                    <label for="advalorem" class="block font-medium mb-1 text-gray-700">Ставка пошлины (%):</label>
+                    <input type="number" id="advalorem" min="0" step="0.1" value="0" 
+                           class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div id="specific-rate-container" class="hidden">
+                    <label for="specific" class="block font-medium mb-1 text-gray-700">Ставка пошлины (евро):</label>
+                    <input type="number" id="specific" min="0" step="0.01" value="0" 
+                           class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
             
-            <h2 class="text-xl font-semibold mb-4">Акциз</h2>
-            <div class="mb-6">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Товар является подакцизным?
-                    </label>
-                    <div class="flex gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="hasExcise" value="no" class="form-radio h-4 w-4 text-blue-600" checked>
-                            <span class="ml-2">Нет</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="hasExcise" value="yes" class="form-radio h-4 w-4 text-blue-600">
-                            <span class="ml-2">Да</span>
-                        </label>
+            <!-- Секция акциза -->
+            <div class="mb-5 p-4 border border-gray-300 rounded">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">Акциз</h2>
+                
+                <label class="block font-medium mb-1 text-gray-700">Товар является подакцизным?</label>
+                <div class="flex space-x-4 mb-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="exciseNo" name="excise" value="no" checked class="mr-1">
+                        <label for="exciseNo" class="text-gray-700">Нет</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="exciseYes" name="excise" value="yes" class="mr-1">
+                        <label for="exciseYes" class="text-gray-700">Да</label>
                     </div>
                 </div>
                 
-                <div id="exciseSection" class="hidden">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Тип ставки акциза
-                        </label>
-                        <div class="flex flex-wrap gap-2">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="exciseType" value="specific" class="form-radio h-4 w-4 text-blue-600" checked>
-                                <span class="ml-2">Специфическая (руб.)</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="exciseType" value="advalorem" class="form-radio h-4 w-4 text-blue-600">
-                                <span class="ml-2">Адвалорная (%)</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="exciseType" value="combined" class="form-radio h-4 w-4 text-blue-600">
-                                <span class="ml-2">Комбинированная</span>
-                            </label>
+                <div id="excise-fields" class="hidden">
+                    <label class="block font-medium mb-1 text-gray-700">Тип ставки акциза:</label>
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="exciseTypeSpecific" name="exciseType" value="specific" checked class="mr-1">
+                            <label for="exciseTypeSpecific" class="text-gray-700">Специфическая (руб.)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="exciseTypeAdvalorem" name="exciseType" value="advalorem" class="mr-1">
+                            <label for="exciseTypeAdvalorem" class="text-gray-700">Адвалорная (%)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="exciseTypeCombined" name="exciseType" value="combined" class="mr-1">
+                            <label for="exciseTypeCombined" class="text-gray-700">Комбинированная</label>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="exciseRateRub">
-                                Ставка акциза (руб.)
-                            </label>
-                            <input type="number" id="exciseRateRub" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="exciseRatePercent">
-                                Ставка акциза (%)
-                            </label>
-                            <input type="number" id="exciseRatePercent" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.1">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="exciseRateEuro">
-                                Ставка акциза (евро)
-                            </label>
-                            <input type="number" id="exciseRateEuro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
-                        </div>
+                    <div id="exciseSpecific">
+                        <label for="exciseRateRub" class="block font-medium mb-1 text-gray-700">Ставка акциза (руб.):</label>
+                        <input type="number" id="exciseRateRub" min="0" step="0.01" value="0" 
+                               class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div id="exciseAdvalorem" class="hidden">
+                        <label for="exciseRatePercent" class="block font-medium mb-1 text-gray-700">Ставка акциза (%):</label>
+                        <input type="number" id="exciseRatePercent" min="0" step="0.1" value="0" 
+                               class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div id="exciseEuro" class="hidden">
+                        <label for="exciseRateEuro" class="block font-medium mb-1 text-gray-700">Ставка акциза (евро):</label>
+                        <input type="number" id="exciseRateEuro" min="0" step="0.01" value="0" 
+                               class="w-full p-2 mb-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
             
-            <h2 class="text-xl font-semibold mb-4">НДС</h2>
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1" for="vatRate">
-                    Ставка НДС (%)
-                </label>
-                <select id="vatRate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="20">20%</option>
-                    <option value="10">10%</option>
-                    <option value="0">0%</option>
-                </select>
+            <!-- Секция НДС -->
+            <div class="mb-5 p-4 border border-gray-300 rounded">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">НДС</h2>
+                
+                <label class="block font-medium mb-1 text-gray-700">Ставка НДС (%):</label>
+                <div class="flex flex-wrap gap-4 mb-2">
+                    <div class="flex items-center">
+                        <input type="radio" id="vat20" name="vat" value="20" checked class="mr-1">
+                        <label for="vat20" class="text-gray-700">20%</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="vat10" name="vat" value="10" class="mr-1">
+                        <label for="vat10" class="text-gray-700">10%</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="vat0" name="vat" value="0" class="mr-1">
+                        <label for="vat0" class="text-gray-700">0%</label>
+                    </div>
+                </div>
             </div>
             
-            <button id="calculateBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+            <!-- Кнопка расчета -->
+            <button id="calculate" class="w-full py-2.5 px-5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded cursor-pointer transition duration-200">
                 Рассчитать таможенные платежи
             </button>
-        </div>
-        
-        <div id="resultSection" class="hidden bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Результаты расчета</h2>
             
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="text-gray-600">Таможенная стоимость (руб.):</div>
-                    <div id="resultCustomsCost" class="font-medium text-right">0.00 ₽</div>
+            <!-- Секция результатов -->
+            <div class="results mt-5 p-4 bg-gray-50 rounded border border-gray-300">
+                <h2 class="mt-0 text-lg text-gray-700 font-semibold mb-3">Результаты расчета</h2>
+                <div class="flex justify-between mb-2.5">
+                    <span class="text-gray-700">Таможенная стоимость (руб.):</span>
+                    <span id="result-customs-value" class="font-medium">0.00 ₽</span>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="text-gray-600">Таможенная пошлина:</div>
-                    <div id="resultDuty" class="font-medium text-right">0.00 ₽</div>
+                <div class="flex justify-between mb-2.5">
+                    <span class="text-gray-700">Таможенная пошлина:</span>
+                    <span id="result-duty" class="font-medium">0.00 ₽</span>
                 </div>
-                
-                <div id="resultExciseRow" class="grid grid-cols-2 gap-2 hidden">
-                    <div class="text-gray-600">Акциз:</div>
-                    <div id="resultExcise" class="font-medium text-right">0.00 ₽</div>
+                <div class="flex justify-between mb-2.5">
+                    <span class="text-gray-700">Акциз:</span>
+                    <span id="result-excise" class="font-medium">0.00 ₽</span>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="text-gray-600">НДС:</div>
-                    <div id="resultVAT" class="font-medium text-right">0.00 ₽</div>
+                <div class="flex justify-between mb-2.5">
+                    <span class="text-gray-700">НДС:</span>
+                    <span id="result-vat" class="font-medium">0.00 ₽</span>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="text-gray-600">Таможенные сборы:</div>
-                    <div id="resultFees" class="font-medium text-right">0.00 ₽</div>
+                <div class="flex justify-between mb-2.5">
+                    <span class="text-gray-700">Таможенные сборы:</span>
+                    <span id="result-fees" class="font-medium">0.00 ₽</span>
                 </div>
-                
-                <div class="border-t pt-4 grid grid-cols-2 gap-2">
-                    <div class="font-semibold text-gray-800">ИТОГО:</div>
-                    <div id="resultTotal" class="font-bold text-right text-lg">0.00 ₽</div>
+                <div class="flex justify-between font-bold border-t border-gray-300 pt-2.5 mt-2.5">
+                    <span>ИТОГО:</span>
+                    <span id="result-total">0.00 ₽</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Управление отображением секции акциза
-        document.querySelectorAll('input[name="hasExcise"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const exciseSection = document.getElementById('exciseSection');
-                if (this.value === 'yes') {
-                    exciseSection.classList.remove('hidden');
-                } else {
-                    exciseSection.classList.add('hidden');
+        // Глобальные переменные
+        let productsData = []; // Массив всех товаров
+        let searchTimeout; // Для задержки поиска при вводе
+        
+        // Загрузка данных при открытии страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            // Загружаем JSON с данными о товарах
+            fetch('data.json')
+                .then(response => response.json())
+                .then(data => {
+                    productsData = data;
+                    console.log(`Загружено ${productsData.length} товаров`);
+                    setupEventListeners();
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки данных товаров:', error);
+                    // Добавляем уведомление об ошибке
+                    const searchInput = document.getElementById('productSearch');
+                    searchInput.placeholder = 'Ошибка загрузки данных. Проверьте консоль.';
+                    searchInput.classList.add('border-red-500');
+                });
+        });
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Обработка ввода в поле поиска
+            const searchInput = document.getElementById('productSearch');
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim().toLowerCase();
+                
+                // Если запрос пустой, скрываем результаты
+                if (query.length < 3) {
+                    hideSearchResults();
+                    return;
+                }
+                
+                // Задержка для снижения нагрузки при быстром вводе
+                searchTimeout = setTimeout(() => {
+                    searchProducts(query);
+                }, 300);
+            });
+            
+            // Скрытие результатов поиска при клике вне поля и результатов
+            document.addEventListener('click', function(event) {
+                const searchInput = document.getElementById('productSearch');
+                const searchResults = document.getElementById('searchResults');
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    hideSearchResults();
                 }
             });
-        });
-
-        // Обработка нажатия кнопки расчета
-        document.getElementById('calculateBtn').addEventListener('click', function() {
-            calculateCustomsPayments();
-        });
-
-        // Функция расчета таможенных платежей
-        function calculateCustomsPayments() {
-            // Получаем введенные значения
-            const customsCost = parseFloat(document.getElementById('customsCost').value) || 0;
-            const currency = document.getElementById('currency').value;
-            const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
-            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
             
-            const dutyType = document.querySelector('input[name="dutyType"]:checked').value;
-            const dutyRatePercent = parseFloat(document.getElementById('dutyRatePercent').value) || 0;
-            const dutyRateEuro = parseFloat(document.getElementById('dutyRateEuro').value) || 0;
+            // Обработчики для типа ставки таможенной пошлины
+            document.querySelectorAll('input[name="rateType"]').forEach(radio => {
+                radio.addEventListener('change', updateRateFieldsVisibility);
+            });
             
-            const hasExcise = document.querySelector('input[name="hasExcise"]:checked').value === 'yes';
-            const exciseType = hasExcise ? document.querySelector('input[name="exciseType"]:checked').value : null;
-            const exciseRateRub = parseFloat(document.getElementById('exciseRateRub').value) || 0;
-            const exciseRatePercent = parseFloat(document.getElementById('exciseRatePercent').value) || 0;
-            const exciseRateEuro = parseFloat(document.getElementById('exciseRateEuro').value) || 0;
+            // Обработчики для показа/скрытия полей акциза
+            document.querySelectorAll('input[name="excise"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('excise-fields').style.display = 
+                        this.value === 'yes' ? 'block' : 'none';
+                });
+            });
             
-            const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+            // Обработчики для типа акциза
+            document.querySelectorAll('input[name="exciseType"]').forEach(radio => {
+                radio.addEventListener('change', updateExciseFieldsVisibility);
+            });
             
-            // Переводим таможенную стоимость в рубли
-            const customsCostRub = customsCost * exchangeRate;
+            // Кнопка расчета
+            document.getElementById('calculate').addEventListener('click', calculateCustomsDuties);
+        }
+        
+        // Поиск товаров по запросу
+        function searchProducts(query) {
+            // Поиск по коду или наименованию
+            const results = productsData.filter(product => {
+                return product.code.toLowerCase().includes(query) || 
+                       product.name.toLowerCase().includes(query);
+            }).slice(0, 20); // Ограничиваем до 20 результатов для производительности
             
-            // Расчет таможенной пошлины в зависимости от типа ставки
-            let duty = 0;
-            switch (dutyType) {
-                case 'advalorem':
-                    duty = customsCostRub * (dutyRatePercent / 100);
-                    break;
-                case 'specific':
-                    // Предполагаем курс евро к рублю
-                    const euroRate = currency === 'EUR' ? exchangeRate : 100;
-                    duty = quantity * dutyRateEuro * euroRate;
-                    break;
-                case 'combined':
-                    const euroRate2 = currency === 'EUR' ? exchangeRate : 100;
-                    const advalorem = customsCostRub * (dutyRatePercent / 100);
-                    const specific = quantity * dutyRateEuro * euroRate2;
-                    duty = advalorem + specific;
-                    break;
-                case 'combinedMax':
-                    const euroRate3 = currency === 'EUR' ? exchangeRate : 100;
-                    const advalorem2 = customsCostRub * (dutyRatePercent / 100);
-                    const specific2 = quantity * dutyRateEuro * euroRate3;
-                    duty = Math.max(advalorem2, specific2);
-                    break;
+            displaySearchResults(results);
+        }
+        
+        // Отображение результатов поиска
+        function displaySearchResults(results) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">Товары не найдены</div>';
+                resultsContainer.classList.remove('hidden');
+                return;
             }
             
-            // Расчет акциза
+            results.forEach(product => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item p-2 border-b border-gray-200';
+                resultItem.innerHTML = `
+                    <div class="font-bold">${product.code}</div>
+                    <div class="text-sm truncate">${product.name}</div>
+                `;
+                
+                // При клике на элемент выбираем товар
+                resultItem.addEventListener('click', () => selectProduct(product));
+                
+                resultsContainer.appendChild(resultItem);
+            });
+            
+            resultsContainer.classList.remove('hidden');
+        }
+        
+        // Скрытие результатов поиска
+        function hideSearchResults() {
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+        
+        // Выбор товара из результатов поиска
+        function selectProduct(product) {
+            // Заполняем поля информации о товаре
+            document.getElementById('productCode').value = product.code;
+            document.getElementById('productDescription').value = product.name;
+            document.getElementById('productSearch').value = `${product.code} - ${product.name.substring(0, 50)}${product.name.length > 50 ? '...' : ''}`;
+            
+            // Заполняем данные о пошлине, если они есть
+            if (product.tariff_parsed) {
+                const tariff = product.tariff_parsed;
+                
+                // Устанавливаем тип ставки
+                if (tariff.type === 'advalorem') {
+                    document.getElementById('rateTypeAdvalorem').checked = true;
+                    document.getElementById('advalorem').value = tariff.advalorem_percent || 0;
+                } 
+                else if (tariff.type === 'specific') {
+                    document.getElementById('rateTypeSpecific').checked = true;
+                    document.getElementById('specific').value = tariff.specific_rate || 0;
+                } 
+                else if (tariff.type === 'combined_add') {
+                    document.getElementById('rateTypeCombinedAdd').checked = true;
+                    document.getElementById('advalorem').value = tariff.advalorem_percent || 0;
+                    document.getElementById('specific').value = tariff.specific_rate || 0;
+                } 
+                else if (tariff.type === 'combined_max') {
+                    document.getElementById('rateTypeCombinedMax').checked = true;
+                    document.getElementById('advalorem').value = tariff.advalorem_percent || 0;
+                    document.getElementById('specific').value = tariff.specific_rate || 0;
+                }
+                
+                // Обновляем видимость полей
+                updateRateFieldsVisibility();
+            }
+            
+            hideSearchResults();
+        }
+        
+        // Обновление видимости полей ставки в зависимости от выбранного типа
+        function updateRateFieldsVisibility() {
+            const selectedType = document.querySelector('input[name="rateType"]:checked').value;
+            
+            document.getElementById('advalorem-rate-container').style.display = 
+                (selectedType === 'advalorem' || selectedType === 'combined_add' || selectedType === 'combined_max') ? 'block' : 'none';
+                
+            document.getElementById('specific-rate-container').style.display = 
+                (selectedType === 'specific' || selectedType === 'combined_add' || selectedType === 'combined_max') ? 'block' : 'none';
+        }
+        
+        // Обновление видимости полей акциза
+        function updateExciseFieldsVisibility() {
+            const selectedType = document.querySelector('input[name="exciseType"]:checked').value;
+            
+            document.getElementById('exciseSpecific').style.display = 
+                (selectedType === 'specific' || selectedType === 'combined') ? 'block' : 'none';
+                
+            document.getElementById('exciseAdvalorem').style.display = 
+                (selectedType === 'advalorem' || selectedType === 'combined') ? 'block' : 'none';
+                
+            document.getElementById('exciseEuro').style.display = 
+                (selectedType === 'combined') ? 'block' : 'none';
+        }
+        
+        // Расчет таможенных платежей
+        function calculateCustomsDuties() {
+            // Получаем значения из формы
+            const customsValue = parseFloat(document.getElementById('customsValue').value) || 0;
+            const currencyRate = parseFloat(document.getElementById('currencyRate').value) || 1;
+            const quantity = parseFloat(document.getElementById('quantity').value) || 1;
+            
+            // Рассчитываем таможенную стоимость в рублях
+            const customsValueRub = customsValue * currencyRate;
+            
+            // Определяем тип ставки и рассчитываем пошлину
+            const dutyRateType = document.querySelector('input[name="rateType"]:checked').value;
+            let duty = 0;
+            
+            if (dutyRateType === 'advalorem') {
+                const advalorumRate = parseFloat(document.getElementById('advalorem').value) || 0;
+                duty = customsValueRub * (advalorumRate / 100);
+            } 
+            else if (dutyRateType === 'specific') {
+                const specificRate = parseFloat(document.getElementById('specific').value) || 0;
+                duty = specificRate * currencyRate * quantity;
+            } 
+            else if (dutyRateType === 'combined_add') {
+                const advalorumRate = parseFloat(document.getElementById('advalorem').value) || 0;
+                const specificRate = parseFloat(document.getElementById('specific').value) || 0;
+                
+                const advalorumDuty = customsValueRub * (advalorumRate / 100);
+                const specificDuty = specificRate * currencyRate * quantity;
+                
+                duty = advalorumDuty + specificDuty;
+            } 
+            else if (dutyRateType === 'combined_max') {
+                const advalorumRate = parseFloat(document.getElementById('advalorem').value) || 0;
+                const specificRate = parseFloat(document.getElementById('specific').value) || 0;
+                
+                const advalorumDuty = customsValueRub * (advalorumRate / 100);
+                const specificDuty = specificRate * currencyRate * quantity;
+                
+                duty = Math.max(advalorumDuty, specificDuty);
+            }
+            
+            // Расчет акциза, если применимо
             let excise = 0;
-            if (hasExcise) {
-                switch (exciseType) {
-                    case 'specific':
-                        excise = quantity * exciseRateRub;
-                        break;
-                    case 'advalorem':
-                        excise = (customsCostRub + duty) * (exciseRatePercent / 100);
-                        break;
-                    case 'combined':
-                        const euroRateExcise = currency === 'EUR' ? exchangeRate : 100;
-                        const advalorem = customsCostRub * (exciseRatePercent / 100);
-                        const specific = quantity * exciseRateEuro * euroRateExcise;
-                        excise = advalorem + specific;
-                        break;
+            if (document.querySelector('input[name="excise"]:checked').value === 'yes') {
+                const exciseType = document.querySelector('input[name="exciseType"]:checked').value;
+                
+                if (exciseType === 'specific') {
+                    const exciseRateRub = parseFloat(document.getElementById('exciseRateRub').value) || 0;
+                    excise = exciseRateRub * quantity;
+                } 
+                else if (exciseType === 'advalorem') {
+                    const exciseRatePercent = parseFloat(document.getElementById('exciseRatePercent').value) || 0;
+                    excise = customsValueRub * (exciseRatePercent / 100);
+                } 
+                else if (exciseType === 'combined') {
+                    const exciseRateRub = parseFloat(document.getElementById('exciseRateRub').value) || 0;
+                    const exciseRatePercent = parseFloat(document.getElementById('exciseRatePercent').value) || 0;
+                    const exciseRateEuro = parseFloat(document.getElementById('exciseRateEuro').value) || 0;
+                    
+                    const specificExcise = exciseRateRub * quantity;
+                    const advalorumExcise = customsValueRub * (exciseRatePercent / 100);
+                    const euroExcise = exciseRateEuro * currencyRate * quantity;
+                    
+                    excise = specificExcise + advalorumExcise + euroExcise;
                 }
             }
             
             // Расчет НДС
-            const vat = (customsCostRub + duty + excise) * (vatRate / 100);
+            const vatRate = parseFloat(document.querySelector('input[name="vat"]:checked').value) || 0;
+            const vat = (customsValueRub + duty + excise) * (vatRate / 100);
             
-            // Расчет таможенных сборов в зависимости от таможенной стоимости
+            // Расчет таможенных сборов (упрощенный расчет)
             let fees = 0;
-            if (customsCostRub <= 200000) {
+            if (customsValueRub <= 200000) {
                 fees = 775;
-            } else if (customsCostRub <= 450000) {
+            } else if (customsValueRub <= 450000) {
                 fees = 1550;
-            } else if (customsCostRub <= 1200000) {
+            } else if (customsValueRub <= 1200000) {
                 fees = 3100;
-            } else if (customsCostRub <= 2700000) {
+            } else if (customsValueRub <= 2500000) {
                 fees = 8530;
-            } else if (customsCostRub <= 4200000) {
+            } else if (customsValueRub <= 5000000) {
                 fees = 12000;
-            } else if (customsCostRub <= 5500000) {
+            } else if (customsValueRub <= 10000000) {
                 fees = 15500;
-            } else if (customsCostRub <= 7000000) {
-                fees = 20000;
-            } else if (customsCostRub <= 8000000) {
-                fees = 23000;
-            } else if (customsCostRub <= 9000000) {
-                fees = 25000;
-            } else if (customsCostRub <= 10000000) {
-                fees = 27000;
             } else {
-                fees = 30000;
+                fees = 20000;
             }
             
-            // Итоговая сумма всех платежей
+            // Итоговая сумма
             const total = duty + excise + vat + fees;
             
             // Отображаем результаты
-            document.getElementById('resultCustomsCost').textContent = formatCurrency(customsCostRub);
-            document.getElementById('resultDuty').textContent = formatCurrency(duty);
-            
-            if (hasExcise) {
-                document.getElementById('resultExciseRow').classList.remove('hidden');
-                document.getElementById('resultExcise').textContent = formatCurrency(excise);
-            } else {
-                document.getElementById('resultExciseRow').classList.add('hidden');
-            }
-            
-            document.getElementById('resultVAT').textContent = formatCurrency(vat);
-            document.getElementById('resultFees').textContent = formatCurrency(fees);
-            document.getElementById('resultTotal').textContent = formatCurrency(total);
-            
-            // Показываем блок с результатами
-            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('result-customs-value').textContent = formatCurrency(customsValueRub);
+            document.getElementById('result-duty').textContent = formatCurrency(duty);
+            document.getElementById('result-excise').textContent = formatCurrency(excise);
+            document.getElementById('result-vat').textContent = formatCurrency(vat);
+            document.getElementById('result-fees').textContent = formatCurrency(fees);
+            document.getElementById('result-total').textContent = formatCurrency(total);
         }
         
-        // Форматирование чисел в денежный формат
-        function formatCurrency(number) {
-            return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(number);
+        // Форматирование валюты (рубли)
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ru-RU', { 
+                style: 'currency', 
+                currency: 'RUB',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2 
+            }).format(amount);
         }
-
-        // Слушатель изменения валюты для автоматической установки курса
-        document.getElementById('currency').addEventListener('change', function() {
-            const exchangeRateInput = document.getElementById('exchangeRate');
-            switch (this.value) {
-                case 'USD':
-                    exchangeRateInput.value = '90.5';
-                    break;
-                case 'EUR':
-                    exchangeRateInput.value = '97.8';
-                    break;
-                case 'CNY':
-                    exchangeRateInput.value = '12.5';
-                    break;
-                default:
-                    exchangeRateInput.value = '1';
-            }
-        });
     </script>
 </body>
 </html>
