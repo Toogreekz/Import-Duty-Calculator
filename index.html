@@ -20,12 +20,12 @@
 </head>
 <body class="bg-gray-50 min-h-screen py-8">
     <div class="container mx-auto px-4 max-w-4xl">
-        <h1 class="text-3xl font-bold text-center mb-6">Калькулятор таможенных платежей</h1>
-
         <div class="flex justify-center mb-6">
             <img src="image.png" alt="Таможенный калькулятор" class="max-w-full h-auto rounded-lg shadow-md">
         </div>
         
+        <h2 class="text-3xl font-bold text-center mb-6">Определите код ТН ВЭД и рассчитайте платежи в таможню</h2>
+
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Информация о товаре</h2>
             
@@ -213,6 +213,79 @@
                 </select>
             </div>
             
+            <!-- Добавление секции условий поставки -->
+            <h2 class="text-xl font-semibold mb-4">Условия поставки</h2>
+            <div class="mb-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Учитывать условия поставки?
+                    </label>
+                    <div class="flex gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="hasDelivery" value="no" class="form-radio h-4 w-4 text-blue-600" checked>
+                            <span class="ml-2">Нет</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="hasDelivery" value="yes" class="form-radio h-4 w-4 text-blue-600">
+                            <span class="ml-2">Да</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="deliverySection" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="deliveryType">
+                            Условие поставки
+                        </label>
+                        <select id="deliveryType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="EXW">EXW (Франко-завод)</option>
+                            <option value="FCA">FCA (Франко-перевозчик)</option>
+                            <option value="FAS">FAS (Свободно вдоль борта судна)</option>
+                            <option value="FOB">FOB (Свободно на борту)</option>
+                            <option value="CFR">CFR (Стоимость и фрахт)</option>
+                            <option value="CIF">CIF (Стоимость, страхование и фрахт)</option>
+                            <option value="CPT">CPT (Перевозка оплачена до)</option>
+                            <option value="CIP">CIP (Перевозка и страхование оплачены до)</option>
+                            <option value="DAP">DAP (Поставка в пункте)</option>
+                            <option value="DPU">DPU (Поставка на месте выгрузки)</option>
+                            <option value="DDP">DDP (Поставка с оплатой пошлин)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div id="transportCostContainer">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="transportCost">
+                                Стоимость перевозки
+                            </label>
+                            <div class="flex">
+                                <input type="number" id="transportCost" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
+                                <select id="transportCurrency" class="px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50">
+                                    <option value="RUB">₽</option>
+                                    <option value="USD">$</option>
+                                    <option value="EUR">€</option>
+                                    <option value="CNY">¥</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="insuranceCostContainer">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="insuranceCost">
+                                Стоимость страховки
+                            </label>
+                            <div class="flex">
+                                <input type="number" id="insuranceCost" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01">
+                                <select id="insuranceCurrency" class="px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50">
+                                    <option value="RUB">₽</option>
+                                    <option value="USD">$</option>
+                                    <option value="EUR">€</option>
+                                    <option value="CNY">¥</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <button id="calculateBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                 Рассчитать таможенные платежи
             </button>
@@ -225,6 +298,22 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="text-gray-600">Таможенная стоимость (руб.):</div>
                     <div id="resultCustomsCost" class="font-medium text-right">0.00 ₽</div>
+                </div>
+                
+                <!-- Добавляем строки для отображения стоимости доставки -->
+                <div id="resultTransportRow" class="grid grid-cols-2 gap-2 hidden">
+                    <div class="text-gray-600">Стоимость перевозки:</div>
+                    <div id="resultTransport" class="font-medium text-right">0.00 ₽</div>
+                </div>
+                
+                <div id="resultInsuranceRow" class="grid grid-cols-2 gap-2 hidden">
+                    <div class="text-gray-600">Стоимость страховки:</div>
+                    <div id="resultInsurance" class="font-medium text-right">0.00 ₽</div>
+                </div>
+                
+                <div id="resultTotalCostRow" class="grid grid-cols-2 gap-2 hidden">
+                    <div class="text-gray-600">Итого стоимость с учётом доставки:</div>
+                    <div id="resultTotalCost" class="font-medium text-right">0.00 ₽</div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-2">
@@ -313,6 +402,12 @@
             document.querySelectorAll('input[name="dutyType"]').forEach(radio => {
                 radio.addEventListener('change', updateDutyFieldsVisibility);
             });
+
+            // Обработчики для валюты перевозки и страховки - синхронизируем с основной валютой
+            document.getElementById('currency').addEventListener('change', function() {
+                document.getElementById('transportCurrency').value = this.value;
+                document.getElementById('insuranceCurrency').value = this.value;
+            });
         }
 
         // Настройка обработчиков событий из исходного файла
@@ -327,6 +422,23 @@
                         exciseSection.classList.add('hidden');
                     }
                 });
+            });
+
+            // Управление отображением секции условий поставки
+            document.querySelectorAll('input[name="hasDelivery"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const deliverySection = document.getElementById('deliverySection');
+                    if (this.value === 'yes') {
+                        deliverySection.classList.remove('hidden');
+                    } else {
+                        deliverySection.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Обновление полей в зависимости от условия поставки
+            document.getElementById('deliveryType').addEventListener('change', function() {
+                updateDeliveryFields();
             });
 
             // Обработка нажатия кнопки расчета
@@ -351,6 +463,25 @@
                         exchangeRateInput.value = '1';
                 }
             });
+        }
+
+        // Обновление полей в зависимости от условия поставки
+        function updateDeliveryFields() {
+            const deliveryType = document.getElementById('deliveryType').value;
+            const transportCostContainer = document.getElementById('transportCostContainer');
+            const insuranceCostContainer = document.getElementById('insuranceCostContainer');
+            
+            // По умолчанию показываем оба поля
+            transportCostContainer.classList.remove('hidden');
+            insuranceCostContainer.classList.remove('hidden');
+            
+            // Условия, при которых некоторые поля не нужны
+            if (['CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'].includes(deliveryType)) {
+                transportCostContainer.classList.add('hidden');
+                insuranceCostContainer.classList.add('hidden');
+            } else if (deliveryType === 'CFR') {
+                transportCostContainer.classList.add('hidden');
+            }
         }
 
         // Поиск товаров по запросу
@@ -415,17 +546,18 @@
                 } 
                 else if (tariff.type === 'specific') {
                     document.querySelector('input[name="dutyType"][value="specific"]').checked = true;
-                    document.getElementById('dutyRateEuro').value = tariff.specific_rate || 0;
+                    // Исправление: использование specific_euro вместо specific_rate
+                    document.getElementById('dutyRateEuro').value = tariff.specific_euro || tariff.specific_rate || 0;
                 } 
                 else if (tariff.type === 'combined_add') {
                     document.querySelector('input[name="dutyType"][value="combined_add"]').checked = true;
                     document.getElementById('dutyRatePercent').value = tariff.advalorem_percent || 0;
-                    document.getElementById('dutyRateEuro').value = tariff.specific_rate || 0;
+                    document.getElementById('dutyRateEuro').value = tariff.specific_euro || tariff.specific_rate || 0;
                 } 
                 else if (tariff.type === 'combined_max') {
                     document.querySelector('input[name="dutyType"][value="combined_max"]').checked = true;
                     document.getElementById('dutyRatePercent').value = tariff.advalorem_percent || 0;
-                    document.getElementById('dutyRateEuro').value = tariff.specific_rate || 0;
+                    document.getElementById('dutyRateEuro').value = tariff.specific_euro || tariff.specific_rate || 0;
                 }
                 
                 // Обновление видимости полей ставки
@@ -434,6 +566,7 @@
             
             hideSearchResults();
         }
+
 
         // Обновление видимости полей ставки в зависимости от выбранного типа
         function updateDutyFieldsVisibility() {
@@ -447,7 +580,7 @@
                 (selectedType === 'specific' || selectedType === 'combined_add' || selectedType === 'combined_max') ? 'block' : 'none';
         }
 
-        // Функция расчета таможенных платежей (из исходного файла с небольшими изменениями)
+        // Функция расчета таможенных платежей
         function calculateCustomsPayments() {
             // Получаем введенные значения
             const customsCost = parseFloat(document.getElementById('customsCost').value) || 0;
@@ -455,41 +588,77 @@
             const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 1;
             const quantity = parseFloat(document.getElementById('quantity').value) || 0;
             
+            // Значения для доставки
+            const hasDelivery = document.querySelector('input[name="hasDelivery"]:checked').value === 'yes';
+            let transportCost = 0;
+            let insuranceCost = 0;
+            let additionalCost = 0;
+            
+            if (hasDelivery) {
+                const deliveryType = document.getElementById('deliveryType').value;
+                
+                // Получаем стоимость перевозки и страховки, если нужно
+                if (['EXW', 'FCA', 'FAS', 'FOB'].includes(deliveryType)) {
+                    const transportCostValue = parseFloat(document.getElementById('transportCost').value) || 0;
+                    const transportCurrency = document.getElementById('transportCurrency').value;
+                    const transportRate = transportCurrency === currency ? exchangeRate : getExchangeRate(transportCurrency);
+                    
+                    const insuranceCostValue = parseFloat(document.getElementById('insuranceCost').value) || 0;
+                    const insuranceCurrency = document.getElementById('insuranceCurrency').value;
+                    const insuranceRate = insuranceCurrency === currency ? exchangeRate : getExchangeRate(insuranceCurrency);
+                    
+                    transportCost = transportCostValue * transportRate;
+                    insuranceCost = insuranceCostValue * insuranceRate;
+                    additionalCost = transportCost + insuranceCost;
+                } 
+                else if (deliveryType === 'CFR') {
+                    const insuranceCostValue = parseFloat(document.getElementById('insuranceCost').value) || 0;
+                    const insuranceCurrency = document.getElementById('insuranceCurrency').value;
+                    const insuranceRate = insuranceCurrency === currency ? exchangeRate : getExchangeRate(insuranceCurrency);
+                    
+                    insuranceCost = insuranceCostValue * insuranceRate;
+                    additionalCost = insuranceCost;
+                }
+            }
+            
+            // Общая таможенная стоимость с учетом доставки
+            const customsCostRub = customsCost * exchangeRate;
+            const totalCustomsCost = customsCostRub + additionalCost;
+            
+            // Получаем данные о пошлине
             const dutyType = document.querySelector('input[name="dutyType"]:checked').value;
             const dutyRatePercent = parseFloat(document.getElementById('dutyRatePercent').value) || 0;
             const dutyRateEuro = parseFloat(document.getElementById('dutyRateEuro').value) || 0;
             
+            // Данные об акцизе
             const hasExcise = document.querySelector('input[name="hasExcise"]:checked').value === 'yes';
             const exciseType = hasExcise ? document.querySelector('input[name="exciseType"]:checked').value : null;
             const exciseRateRub = parseFloat(document.getElementById('exciseRateRub').value) || 0;
             const exciseRatePercent = parseFloat(document.getElementById('exciseRatePercent').value) || 0;
             const exciseRateEuro = parseFloat(document.getElementById('exciseRateEuro').value) || 0;
             
+            // Ставка НДС
             const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
-            
-            // Переводим таможенную стоимость в рубли
-            const customsCostRub = customsCost * exchangeRate;
             
             // Расчет таможенной пошлины в зависимости от типа ставки
             let duty = 0;
             switch (dutyType) {
                 case 'advalorem':
-                    duty = customsCostRub * (dutyRatePercent / 100);
+                    duty = totalCustomsCost * (dutyRatePercent / 100);
                     break;
                 case 'specific':
-                    // Предполагаем курс евро к рублю
                     const euroRate = currency === 'EUR' ? exchangeRate : 97.8;
                     duty = quantity * dutyRateEuro * euroRate;
                     break;
                 case 'combined_add':
                     const euroRate2 = currency === 'EUR' ? exchangeRate : 97.8;
-                    const advalorem = customsCostRub * (dutyRatePercent / 100);
+                    const advalorem = totalCustomsCost * (dutyRatePercent / 100);
                     const specific = quantity * dutyRateEuro * euroRate2;
                     duty = advalorem + specific;
                     break;
                 case 'combined_max':
                     const euroRate3 = currency === 'EUR' ? exchangeRate : 97.8;
-                    const advalorem2 = customsCostRub * (dutyRatePercent / 100);
+                    const advalorem2 = totalCustomsCost * (dutyRatePercent / 100);
                     const specific2 = quantity * dutyRateEuro * euroRate3;
                     duty = Math.max(advalorem2, specific2);
                     break;
@@ -503,11 +672,11 @@
                         excise = quantity * exciseRateRub;
                         break;
                     case 'advalorem':
-                        excise = (customsCostRub + duty) * (exciseRatePercent / 100);
+                        excise = (totalCustomsCost + duty) * (exciseRatePercent / 100);
                         break;
                     case 'combined':
                         const euroRateExcise = currency === 'EUR' ? exchangeRate : 97.8;
-                        const advalorem = customsCostRub * (exciseRatePercent / 100);
+                        const advalorem = totalCustomsCost * (exciseRatePercent / 100);
                         const specific = quantity * exciseRateEuro * euroRateExcise;
                         excise = advalorem + specific;
                         break;
@@ -515,30 +684,24 @@
             }
             
             // Расчет НДС
-            const vat = (customsCostRub + duty + excise) * (vatRate / 100);
+            const vat = (totalCustomsCost + duty + excise) * (vatRate / 100);
             
             // Расчет таможенных сборов в зависимости от таможенной стоимости
             let fees = 0;
-            if (customsCostRub <= 200000) {
-                fees = 775;
-            } else if (customsCostRub <= 450000) {
-                fees = 1550;
-            } else if (customsCostRub <= 1200000) {
-                fees = 3100;
-            } else if (customsCostRub <= 2700000) {
-                fees = 8530;
-            } else if (customsCostRub <= 4200000) {
-                fees = 12000;
-            } else if (customsCostRub <= 5500000) {
-                fees = 15500;
-            } else if (customsCostRub <= 7000000) {
-                fees = 20000;
-            } else if (customsCostRub <= 8000000) {
-                fees = 23000;
-            } else if (customsCostRub <= 9000000) {
-                fees = 25000;
-            } else if (customsCostRub <= 10000000) {
-                fees = 27000;
+            if (totalCustomsCost <= 200000) {
+                fees = 1067;
+            } else if (totalCustomsCost <= 450000) {
+                fees = 2134;
+            } else if (totalCustomsCost <= 1200000) {
+                fees = 4269;
+            } else if (totalCustomsCost <= 2700000) {
+                fees = 11746;
+            } else if (totalCustomsCost <= 4200000) {
+                fees = 16524;
+            } else if (totalCustomsCost <= 5500000) {
+                fees = 21344;
+            } else if (totalCustomsCost <= 7000000) {
+                fees = 27540;
             } else {
                 fees = 30000;
             }
@@ -548,6 +711,22 @@
             
             // Отображаем результаты
             document.getElementById('resultCustomsCost').textContent = formatCurrency(customsCostRub);
+            
+            // Отображаем информацию о доставке, если она есть
+            if (hasDelivery && (transportCost > 0 || insuranceCost > 0)) {
+                document.getElementById('resultTransportRow').classList.remove('hidden');
+                document.getElementById('resultInsuranceRow').classList.remove('hidden');
+                document.getElementById('resultTotalCostRow').classList.remove('hidden');
+                
+                document.getElementById('resultTransport').textContent = formatCurrency(transportCost);
+                document.getElementById('resultInsurance').textContent = formatCurrency(insuranceCost);
+                document.getElementById('resultTotalCost').textContent = formatCurrency(totalCustomsCost);
+            } else {
+                document.getElementById('resultTransportRow').classList.add('hidden');
+                document.getElementById('resultInsuranceRow').classList.add('hidden');
+                document.getElementById('resultTotalCostRow').classList.add('hidden');
+            }
+            
             document.getElementById('resultDuty').textContent = formatCurrency(duty);
             
             if (hasExcise) {
@@ -563,6 +742,20 @@
             
             // Показываем блок с результатами
             document.getElementById('resultSection').classList.remove('hidden');
+        }
+        
+        // Получение курса валюты
+        function getExchangeRate(currencyCode) {
+            switch (currencyCode) {
+                case 'USD':
+                    return 90.5;
+                case 'EUR':
+                    return 97.8;
+                case 'CNY':
+                    return 12.5;
+                default:
+                    return 1;
+            }
         }
         
         // Форматирование чисел в денежный формат
